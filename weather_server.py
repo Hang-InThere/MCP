@@ -98,6 +98,11 @@ async def get_weather_tool(city: str):
 
 @mcp.tool()
 async def get_restaurant_tool(address: str):
+    """
+    获取附近的饭店信息
+    :param address: 公司地址
+    :return: 饭店信息列表
+    """
     restaurants = await find_restaurants(address)
     return restaurants
 
