@@ -10,20 +10,21 @@ OPENWEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 USER_AGENT = "weather-app/1.0"
 # 配置高德地图 API 密钥
 AMAP_API_KEY = "b5dfc461cbf4f3ee5fa3590a191028b1"
-def get_location(address):
+async def get_location(address):
     url = "https://restapi.amap.com/v3/geocode/geo"
     params = {
         "key": AMAP_API_KEY,
         "address": address
     }
-    response = requests.get(url, params=params)
-    data = response.json()
-    if data.get("status") == "1" and data.get("geocodes"):
-        return data["geocodes"][0]["location"]
-    return None
-def find_restaurants(address):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, params=params)
+        data = response.json()
+        if data.get("status") == "1" and data.get("geocodes"):
+            return data["geocodes"][0]["location"]
+        return None
+async def find_restaurants(address):
     url = "https://restapi.amap.com/v3/place/around"
-    company_location = get_location(address)
+    company_location = await get_location(address)
     params = {
         "key": AMAP_API_KEY,
         "location": company_location,
@@ -33,11 +34,12 @@ def find_restaurants(address):
         "page": 1,
         "offset": 10
     }
-    response = requests.get(url, params=params)
-    data = response.json()
-    if data.get("status") == "1":
-        return data.get("pois", [])
-    return "获取饭店信息失败"
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, params=params)
+        data = response.json()
+        if data.get("status") == "1":
+            return data.get("pois", [])
+        return "获取饭店信息失败"
 
 async def get_weather(city):
     """
